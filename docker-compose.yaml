@@ -1,0 +1,8 @@
+version: '3'
+services:
+  croqueta:
+    image: cjmateos/croqueta:latest
+    volumes:
+      - ./conf:/opt/croqueta/conf
+      - ./keys:/opt/croqueta/keys
+      - ~/.aws:/home/nonroot/.aws

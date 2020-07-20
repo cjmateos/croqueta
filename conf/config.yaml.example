@@ -1,0 +1,9 @@
+---
+region: 'us-east-1'
+bucket: 'croqueta-keys'
+current_key_file: 'current.pem'
+keys_path: 'keys'
+ssh_user: 'ec2-user'
+tag_key: 'Target'
+tag_value: 'keyRenew'
+rotate_key_prefix: 'EC2-Key'
