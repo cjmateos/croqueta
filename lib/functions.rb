@@ -50,9 +50,7 @@ def update_key(configuration, instances, new_key_name, new_private_key_file, new
   instances.each do |i|
     ret_value = false
     instance = ec2.instance(i)
-    #instance_public_dns = instance.public_dns_name
-    instance_public_dns = instance.private_ip_address
-
+    instance_public_dns = configuration['access'] == 'public' ? instance.public_dns_name : instance.private_ip_address
     if instance.state.name == 'running'
       separator
       print_inline "Adding new key to EC2 instance #{instance.id}: "
@@ -121,8 +119,7 @@ def rollback(updated, configuration, key_name_delete, new_private_key_file)
   updated.each do |i|
     separator
     instance = Aws::EC2::Instance.new(i[:id], configuration['region'])
-    #instance_public_dns = instance.public_dns_name
-    instance_public_dns = instance.private_ip_address
+    instance_public_dns = configuration['access'] == 'public' ? instance.public_dns_name : instance.private_ip_address
     print_inline "Recovering previous key to EC2 instance #{i[:id]}: "
     ret = system("echo '#{i[:key]}' | ssh -o StrictHostKeyChecking=no -q -i #{configuration['keys_path']}/#{new_private_key_file} #{configuration['ssh_user']}@#{instance_public_dns} 'cat >> ~/.ssh/authorized_keys'")
     if ret

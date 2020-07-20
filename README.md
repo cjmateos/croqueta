@@ -46,6 +46,7 @@ Copy and rename the `conf/config.yaml.example` file as `conf/config.yaml` and se
 - `tag_key`: Key tag of the target instances in which rotate the ssh key. E.g. 'Target'
 - `tag_value`: Key value of the target instances in which rotate the ssh key. E.g. 'keyRenew'
 - `rotate_key_prefix`: Prefix name for the new keys. E.g. 'EC2-Key'
+- `access`: Public or private access to the instances
 
 **IMPORTANT**:
 - You must to have an S3 bucket already created (the same you set in `bucket` option) in which you must have already stored your current private key file (pem format) in the root path. E.g. `s3://my-bucket/current.pem`
@@ -81,9 +82,7 @@ NOTE: The first host path volume maps the folder where you must have the configu
 
 ## Description
 
-The following section describes the implementation details of the proposed solution.
-
-The program is composed by a main script, [`croqueta.rb`](croqueta.rb) and a functions library [`/lib/functions.rb`](lib/functions.rb) where the operations with keys and AWS EC2 instances and S3 are implemented. Also you can find a file with auxiliar functions called [`/lib/aux.rb`](lib/aux.rb).
+This tool is composed by a main script, [`croqueta.rb`](croqueta.rb) and a functions library [`/lib/functions.rb`](lib/functions.rb) where the operations with keys and AWS EC2 instances and S3 are implemented. Also you can find a file with auxiliar functions called [`/lib/aux.rb`](lib/aux.rb).
 
 Basically, the script expects you have an S3 bucket already created where the current key file can be found in the root path of the bucket. The key file is downloaded to your system. Then, all the EC2 instances with the target tag are identified. The script creates a new key pair and imports it to EC2. It tries to connect with each of the target instances to add a new ssh key. If the connection is success, the old key is removed. Finally, the new key is stored in the S3 bucket as the new current key. Also a backup of the key is saved in the bucket. If for any reason, the new key could not be added to some of the target instances, the process is cancelled and the old key is recovered in each updated instance.
 
@@ -102,19 +101,3 @@ The main script [`croqueta.rb`](croqueta.rb) checks the configuration file which
       - Test ssh logging on each instance with the recovered key.
       - Delete the new key from the EC2 Key Pair repository.
 - If the key has been successfully rotated on every tagged EC2 instances, the new key is uploaded to the S3 bucket (specified in the configuration file). It is saved in the `s3://BUCKET/stored-keys` folder with it original name (backup) and also in the `s3://BUCKET/` root path with the name specified as the configuration key `current_key_file`. E.g. `s3://BUCKET/current.pem`
-
-### Example of rollback process
-
-In the following video, you can see an example of an execution in which the process fails and the rollback is performed.
-
-TODO
-
-## Testing environment
-
-To test the solution, I have used a personal AWS account.
-
-In the AWS account there are created five EC2 instances in the us-east-1 region (cjmateos1, cjmateos2, ...). Three of these instances are tagged with the target tag (`Target`, `keyRenew`).
-
-In addition, there is an S3 bucket (private) called `croqueta-keys`. It contains the `current.pem` file in its root path. Also has a folder `stored-keys` with previous keys and the key for accessing to the non-tagged instances.
-
-You can perform the tests in this environment by using an AWS user for this account, and the same configuration of the [`config.yaml.example`](conf/config.yaml.example) file.

@@ -19,8 +19,8 @@ new_public_key_file = "#{new_key_name}.pub"
 # MAIN
 separator
 print_msg "Croqueta"
+separator
 print_msg "Simple ruby script to automate EC2 SSH keys rotation for AWS"
-print_msg "- Author: Carlos J. Mateos"
 print_msg "- https://github.com/cjmateos/croqueta"
 separator
 
